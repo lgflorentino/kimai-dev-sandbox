@@ -1,5 +1,5 @@
 #!/usr/bin/sh
-# zsh on my machine
+# points to zsh on my machine
 
 set -e 
 
@@ -60,6 +60,10 @@ echo "Entering $0..."
     docker container rm ${CONT_NAME_PGSQL}
 
 [[ "$1" = "db-cont-pgsql" && "$2" = "stop" ]] && docker container stop "${CONT_NAME_PGSQL}"
+
+
+# Build composer container
+[[ "$1" = "composer-build" ]] && docker build --tag=composer_kimai-test:latest $(pwd)/docker-config/composer
 
 # Run composer tests if the above containers have been created
 if [[ "$1" = "composer-tests" ]];
