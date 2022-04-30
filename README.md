@@ -6,5 +6,5 @@ A space to save Kimai dev tooling and debugging helpers
 Inspect the `ctrlr` script for more help
 
 ```sh
-    ./ctrlr <mysql | pgsql>
+    ./ctrlr <mysql|pgsql> <unit|integration|db>
 ```
