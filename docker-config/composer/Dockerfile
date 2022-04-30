@@ -3,13 +3,6 @@ FROM composer:2.0.4
 RUN apk update
 
 RUN apk add --no-cache \
-    oniguruma-dev \
-    libpng-dev \
-    libjpeg-turbo-dev \
-    libzip-dev \
-    freetype-dev \
-    zip \
-    unzip \
     php7-mbstring \
     php7-intl \
     php7-gd \
@@ -17,17 +10,24 @@ RUN apk add --no-cache \
     php7-iconv \
     php7-mysqli \
     php7-pgsql \
+    php7-ldap \
+    zip \
+    unzip
+
+RUN apk add --no-cache --virtual .php-extension-deps \
+    oniguruma-dev \
+    libpng-dev \
+    libjpeg-turbo-dev \
+    libzip-dev \
+    freetype-dev \
+    postgresql-dev \
+    openldap-dev \
     libxslt-dev \
     icu-dev \
-    curl
+    curl && \
+    docker-php-ext-install mbstring zip exif pcntl xsl intl ldap pdo_mysql pdo_pgsql pgsql && \ 
+    docker-php-ext-configure gd && \
+    docker-php-ext-install gd && \
+    apk del .php-extension-deps
 
-RUN docker-php-ext-install mbstring zip exif pcntl xsl intl pdo_mysqli pdo_pgsql pgsql
-RUN docker-php-ext-configure gd
-RUN docker-php-ext-install gd
 
-
-
-RUN addgroup www
-RUN adduser -D -s /bin/zsh -G www www
-RUN addgroup www www-data
-USER www

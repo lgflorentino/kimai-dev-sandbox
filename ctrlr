@@ -1,84 +1,20 @@
-#!/usr/bin/sh
-# points to zsh on my machine
+#!/usr/bin/env zsh
 
 set -e 
 
-#MYSQL Variables
-CONT_NAME_MYSQL="kimai-test-cont-mysql"
-VOL_NAME_MYSQL="kimai-test-vol-mysql"
-MYSQL_IMG_TAG=5.7 # docker tag
-MYSQL_ROOT_PASSWORD="kimai2_test"
-MYSQL_USER="kimai2_test"
-MYSQL_PASSWORD="kimai2_test"
-MYSQL_DATABASE="kimai2_test"
-
-#Postgres Variables
-CONT_NAME_PGSQL="kimai-test-cont-pgsql"
-VOL_NAME_PGSQL="kimai-test-vol-pgsql"
-PGSQL_IMG_TAG="14.2-alpine3.15" #docker tag
-POSTGRES_PASSWORD="kimai2_test"
-POSTGRES_USER="kimai2_test"
-POSTGRES_DB="kima2_test"
-echo "Entering $0..."
-
 [[ ! -d "./kimai2" ]] && echo "Please clone your copy of the kimai2 source to '$(pwd)/kimai2' before continuing" && exit 1
 
+MYSQL_DB_URL="mysql://kimai2_test:kimai2_test@mysql:3306/kimai2_test"
+PGSQL_DB_URL="postgresql://kimai2_test:kimai2_test@pgsql:5432/kimai2_test"
 
-# Mysql commands
-[[ "$1" = "db-cont-mysql" && "$2" = "create" ]] && docker volume create "$VOL_NAME_MYSQL" && \
-    docker run -it -d --rm \
-    -v ${VOL_NAME_MYSQL}:/var/lib/mysql \
-    -v $(pwd)/docker-config/mysql:/etc/mysql/conf.d \
-    --name "${CONT_NAME_MYSQL}" \
-    -p 3306:3306 \
-    -e "MYSQL_ROOT_PASSWORD=$MYSQL_ROOT_PASSWORD" \
-    -e "MYSQL_USER=$MYSQL_USER" \
-    -e "MYSQL_PASSWORD=$MYSQL_PASSWORD" \
-    -e "MYSQL_DATABASE=$MYSQL_DATABASE" \
-    mysql:"${MYSQL_IMG_TAG}"
+[[ $1 = "mysql" ]] && docker compose up -d && docker-compose run --rm \
+    -e DATABASE_URL=${MYSQL_DB_URL} composer kimai:tests-unit
 
-[[ "$1" = "db-cont-mysql" && "$2" = "clean" ]] && \
-    docker container stop ${CONT_NAME_MYSQL} && \
-    docker volume rm "${VOL_NAME_MYSQL}" && \
-    docker container rm ${CONT_NAME_MYSQL}
-[[ "$1" = "db-cont-mysql" && "$2" = "stop" ]] && docker container stop "${CONT_NAME_MYSQL}"
+[[ $1 = "pgsql" ]] && docker compose up -d && docker-compose run --rm \
+    -e DATABASE_URL=${PGSQL_DB_URL} composer kimai:tests-unit
 
-#Postgres commands
-[[ "$1" = "db-cont-pgsql" && "$2" = "create" ]] && docker volume create "$VOL_NAME_PGSQL" && \
-    docker run -it -d --rm \
-    -v ${VOL_NAME_PGSQL}:/var/lib/postgresql/data \
-    --name ${CONT_NAME_PGSQL} \
-    -p 5432:5432 \
-    -e "POSTGRES_USER=$POSTGRES_USER" \
-    -e "POSTGRES_PASSWORD=$POSTGRES_PASSWORD" \
-    -e "POSTGRES_DB=${POSTGRES_DB}" \
-    postgres:"$PGSQL_IMG_TAG"
-
-[[ "$1" = "db-cont-pgsql" && "$2" = "clean" ]] && \
-    docker container stop ${CONT_NAME_PGSQL} && \
-    docker volume rm "${VOL_NAME_PGSQL}" && \
-    docker container rm ${CONT_NAME_PGSQL}
-
-[[ "$1" = "db-cont-pgsql" && "$2" = "stop" ]] && docker container stop "${CONT_NAME_PGSQL}"
-
-
-# Build composer container
-[[ "$1" = "composer-build" ]] && docker build --tag=composer_kimai-test:latest $(pwd)/docker-config/composer
-
-# Run composer tests if the above containers have been created
-if [[ "$1" = "composer-tests" ]];
-then
-    if [[ -d "$(pwd)/kimai2/vendor" ]]; 
-    then
-        (cd kimai2 && composer kimai:tests-unit)
-    else
-        echo "Please run composer to install dependencies first"
-    fi
-fi
-
-
-[[ "$1" = "--help" || "$1" = "-h" || "$1" = "help" || -z "$1" ]] && echo "usage: \n\t\t$0 db-cont-< pgsql | mysql > < create | clean | stop >" && \
-    echo "\t\t $0 composer-tests " 
+[[ "$1" = "--help" || "$1" = "-h" || "$1" = "help" || -z "$1" ]] && \
+    echo "usage: \n\t\t$0"
 
 echo "Exiting $0..."
 exit 0
