@@ -2,19 +2,42 @@
 
 set -e 
 
+# Desc: This is just a script to store common commands that I'm likely to forget. 
+
+
+# simple test for src code
 [[ ! -d "./kimai2" ]] && echo "Please clone your copy of the kimai2 source to '$(pwd)/kimai2' before continuing" && exit 1
 
-MYSQL_DB_URL="mysql://kimai2_test:kimai2_test@mysql:3306/kimai2_test"
-PGSQL_DB_URL="postgresql://kimai2_test:kimai2_test@pgsql:5432/kimai2_test"
+# simple test for docker daemon
+if [ ! docker info > /dev/null 2>&1 ]; 
+then 
+    echo "Docker daemon isn't running..."
+    exit 2
+fi
 
-[[ $1 = "mysql" ]] && docker compose up -d && docker-compose run --rm \
-    -e DATABASE_URL=${MYSQL_DB_URL} composer kimai:tests-unit
+source .env
+
+[[ "$1" = "--help" || "$1" = "-h" || "$1" = "help" || -z "$1" || -z "$2" ]] && \
+    echo "usage:   $0 <mysql | pgsql> <unit | integration | db>" && \
+    echo "\t arg 1: choose between the db backends. options: pgsql, mysql"&& \
+    echo "\t arg 2: choose the test group to run. options: db,unit,integration" && exit 3
+
+DATABASES=($PGSQL_CONT_NAME $MYSQL_CONT_NAME)
+
+# simple check to see if test containers are running
+for DB in $DATABASES
+do
+    set +e && DB_TEST="$(docker container inspect -f '{{.State.Status}}' $DB)" && set -e
+    [[ ! -n "$DB_TEST" ]] && echo "$DB is not running. Script will try to bring up containers with 'docker-compose up -d'" && \
+        docker-compose up -d
+done
+
+[[ $1 = "mysql" ]] && docker-compose run --rm \
+    -e DATABASE_URL=${MYSQL_DB_URL} composer kimai:tests-$2
 
 [[ $1 = "pgsql" ]] && docker compose up -d && docker-compose run --rm \
-    -e DATABASE_URL=${PGSQL_DB_URL} composer kimai:tests-unit
+    -e DATABASE_URL=${PGSQL_DB_URL} composer kimai:tests-$2
 
-[[ "$1" = "--help" || "$1" = "-h" || "$1" = "help" || -z "$1" ]] && \
-    echo "usage: \n\t\t$0"
 
 echo "Exiting $0..."
 exit 0
