@@ -41,3 +41,27 @@ done
 
 echo "Exiting $0..."
 exit 0
+
+# HELP COMMANDS FOR QUICK TURNAROUND DEBUGGING
+<<COMMENT 
+docker run --rm \
+    --network=kimai-dev-sandbox_default \
+    -e DATABASE_URL=mysql://kimai2_test:kimai2_test@mysql:3306/kimai2_test \
+    -v $(pwd)/kimai2:/app \
+    composer_kimai-test:0.0.1 \
+    composer "kimai:tests-db"
+
+ docker run --rm \
+   --network=kimai-dev-sandbox_default \
+    -e DATABASE_URL=postgresql://kimai2_test:kimai2_test@pgsql:5432/kimai2_test \
+    -v $(pwd)/kimai2:/app \
+    composer_kimai-test:0.0.1 \
+    composer "kimai:tests-db"
+
+ docker run --rm \
+   -w /app \
+    -v $(pwd)/kimai2:/app \
+    kimai_php_console \
+    php bin/console debug:container
+
+COMMENT

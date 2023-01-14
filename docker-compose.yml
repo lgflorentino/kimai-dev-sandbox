@@ -2,6 +2,15 @@ version: '3'
 
 services:
 
+  php-console:
+    build:
+      context: ./docker-config/php
+    image: "kimai_php_console"
+    volumes:
+      - ./kimai2:/app
+    networks:
+      - default
+
   mysql:
     image: mysql:5.7
     container_name: "kimai-mysql-test-cont"
