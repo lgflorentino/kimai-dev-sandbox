@@ -64,4 +64,10 @@ docker run --rm \
     kimai_php_console \
     php bin/console debug:container
 
+docker-compose exec pgsql psql -U kimai2_test kimai2_test
+# then run 
+'\\dOS+'
+at the psql prompt
+
+php bin/console doctrine:schema:update --dump-sql
 COMMENT
