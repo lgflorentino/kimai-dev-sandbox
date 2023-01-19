@@ -70,4 +70,12 @@ docker-compose exec pgsql psql -U kimai2_test kimai2_test
 at the psql prompt
 
 php bin/console doctrine:schema:update --dump-sql
+
+docker run --rm -it \
+    --network=kimai-dev-sandbox_default \
+    -e DATABASE_URL="postgresql://kimai2_test:kimai2_test@pgsql:5432/kimai2_test?charset=utf8" \
+    -w /app \
+    -v $(pwd)/kimai2:/app \
+    kimai_php_console \
+    php bin/console doctrine:schema:update --dump-sql
 COMMENT
