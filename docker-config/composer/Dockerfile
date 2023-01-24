@@ -1,4 +1,4 @@
-FROM composer:2.0.4
+FROM composer:2.1.14
 
 RUN apk update
 
