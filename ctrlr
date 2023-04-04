@@ -6,7 +6,7 @@ set -e
 
 
 # simple test for src code
-[[ ! -d "./kimai2" ]] && echo "Please clone your copy of the kimai2 source to '$(pwd)/kimai2' before continuing" && exit 1
+[[ ! -d "./kimai" ]] && echo "Please clone your copy of the kimai source to '$(pwd)/kimai' before continuing" && exit 1
 
 # simple test for docker daemon
 if [ ! docker info > /dev/null 2>&1 ]; 
@@ -46,25 +46,25 @@ exit 0
 <<COMMENT 
 docker run --rm \
     --network=kimai-dev-sandbox_default \
-    -e DATABASE_URL=mysql://kimai2_test:kimai2_test@mysql:3306/kimai2_test \
-    -v $(pwd)/kimai2:/app \
+    -e DATABASE_URL=mysql://kimai_test:kimai_test@mysql:3306/kimai_test \
+    -v $(pwd)/kimai:/app \
     composer_kimai-test:0.0.1 \
     composer "kimai:tests-db"
 
  docker run --rm \
    --network=kimai-dev-sandbox_default \
-    -e DATABASE_URL=postgresql://kimai2_test:kimai2_test@pgsql:5432/kimai2_test \
-    -v $(pwd)/kimai2:/app \
+    -e DATABASE_URL="postgresql://kimai_test:kimai_test@pgsql:5432/kimai_test?charset=utf8" \
+    -v $(pwd)/kimai:/app \
     composer_kimai-test:0.0.1 \
     composer "kimai:tests-db"
 
  docker run --rm \
    -w /app \
-    -v $(pwd)/kimai2:/app \
+    -v $(pwd)/kimai:/app \
     kimai_php_console \
     php bin/console debug:container
 
-docker-compose exec pgsql psql -U kimai2_test kimai2_test
+docker-compose exec pgsql psql -U kimai_test kimai_test
 # then run 
 '\\dOS+'
 at the psql prompt
@@ -73,9 +73,16 @@ php bin/console doctrine:schema:update --dump-sql
 
 docker run --rm -it \
     --network=kimai-dev-sandbox_default \
-    -e DATABASE_URL="postgresql://kimai2_test:kimai2_test@pgsql:5432/kimai2_test?charset=utf8" \
+    -e DATABASE_URL="postgresql://kimai_test:kimai_test@pgsql:5432/kimai_test?charset=utf8" \
     -w /app \
-    -v $(pwd)/kimai2:/app \
+    -v $(pwd)/kimai:/app \
     kimai_php_console \
     php bin/console doctrine:schema:update --dump-sql
+
+docker run --rm \
+    --network=kimai-dev-sandbox_default \
+    -e DATABASE_URL="postgresql://kimai_test:kimai_test@pgsql:5432/kimai_test?charset=utf8" \
+    -v $(pwd)/kimai:/app \
+    composer_kimai-test:0.0.1 \
+    composer codestyle-fix
 COMMENT

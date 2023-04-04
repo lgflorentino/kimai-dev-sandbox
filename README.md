@@ -13,13 +13,14 @@ Inspect the `ctrlr` script for more help
 
 The `.env` file in this directory is used to configure the db backend by setting environment variables inside the docker container running the `php` interpreter.
 These get set by `$1` option. 
-The `php` environment will select the variables in the environment over the ones defined in `kimai2/.env`
+The `php` environment will select the variables in the environment over the ones defined in `kimai/.env`
 
 
 ### Notes
 
-    * Database connections for `Doctrine` are configured in `kimai2/config/packages/doctrine.*.yaml`
-    * The `kimai2/tests/bootstrap.php` kicks off another php interpreter to reset the test DB before running any test code.
+    * Database connections for `Doctrine` are configured in `kimai/config/packages/doctrine.*.yaml`
+    * The `kimai/tests/bootstrap.php` kicks off another php interpreter to reset the test DB before running any test code.
 
 
+ALL
 

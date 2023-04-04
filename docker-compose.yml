@@ -7,7 +7,7 @@ services:
       context: ./docker-config/php
     image: "kimai_php_console"
     volumes:
-      - ./kimai2:/app
+      - ./kimai:/app
     networks:
       - default
 
@@ -17,10 +17,10 @@ services:
     restart: unless-stopped
     tty: true
     environment:
-      MYSQL_ROOT_PASSWORD: "kimai2_test"
-      MYSQL_USER: "kimai2_test"
-      MYSQL_PASSWORD: "kimai2_test"
-      MYSQL_DATABASE: "kimai2_test"
+      MYSQL_ROOT_PASSWORD: "kimai_test"
+      MYSQL_USER: "kimai_test"
+      MYSQL_PASSWORD: "kimai_test"
+      MYSQL_DATABASE: "kimai_test"
     volumes:
       - mysql-data:/var/lib/mysql
       - ./docker-config/mysql:/etc/mysql/conf.d
@@ -32,10 +32,11 @@ services:
     container_name: "kimai-pgsql-test-cont"
     restart: unless-stopped
     tty: true
+    command: ["postgres", "-c", "log_statement=all"]
     environment:
-      POSTGRES_USER: "kimai2_test"
-      POSTGRES_PASSWORD: "kimai2_test"
-      POSTGRES_DB: "kimai2_test"
+      POSTGRES_USER: "kimai_test"
+      POSTGRES_PASSWORD: "kimai_test"
+      POSTGRES_DB: "kimai_test"
     volumes:
       - pgsql-data:/var/lib/postgresql/data
       - ./docker-config/postgresql/postgresql.conf:/var/lib/postgresql/postgresql.conf
@@ -47,7 +48,7 @@ services:
       context: "./docker-config/composer"
     image: composer_kimai-test:0.0.1
     volumes:
-      - ./kimai2:/app
+      - ./kimai:/app
     networks:
       - default
 
